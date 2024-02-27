@@ -35,7 +35,7 @@ async fn main() {
 
     let mut input = String::new();
 
-    println!("do you want to inject or eject?\n1. inject\n2. eject");
+    println!("do you want to inject or eject?\n1. inject\n2. eject\n3. exit");
 
     io::stdin()
         .read_line(&mut input)
@@ -114,8 +114,13 @@ async fn main() {
             }
 
         }
+        3 => {
+            println!("you exited the program");
+            return;
+        }
         _ => {
             println!("{}Invalid choice{}", ANSI_RED, ANSI_RESET);
+            return;
         }
     }
 

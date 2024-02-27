@@ -32,7 +32,7 @@ pub fn eject(which_discord: &str) -> Result<(), Box<dyn std::error::Error>>{
             println!("path: {:?}", path);
             fs::remove_file(path.join(path.join("core.asar"))).unwrap();
             fs::rename(path.join("core.asar.backup"), path.join("core.asar")).unwrap();
-            println!("{}ejected successfully ✓{}feel free to start your discord client now.", ANSI_GREEN, ANSI_RESET);
+            println!("{}ejected successfully ✓{}\nfeel free to start your discord client now.", ANSI_GREEN, ANSI_RESET);
 
             Ok(())
         }

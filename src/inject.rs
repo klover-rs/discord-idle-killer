@@ -1,7 +1,9 @@
+use std::io::Write;
 use std::{fs, path::PathBuf};
 
 use crate::asar::extract::extract_asar;
 use crate::asar::pack::pack_asar;
+
 
 const ANSI_RED: &str = "\x1b[31m";
 const ANSI_GREEN: &str = "\x1b[32m";
@@ -37,14 +39,13 @@ pub async fn inject(which_discord: &str) -> Result<bool, Box<dyn std::error::Err
 					return Ok(true)
 				}
 					
-				
 			}
 
 			fs::copy(path.join("core.asar"), path.join("core.asar.backup")).unwrap();
 
 			extract_asar(path.join("core.asar").to_str().unwrap(), &dest_path).await.unwrap();
 
-			replace_power_monitor(&path.join("unpacked").join("app").join("discord_native").join("browser").join("powerMonitor.js").to_string_lossy().to_string()).unwrap();
+            download_js_files(&path.join("unpacked").join("app").join("discord_native").join("browser").join("powerMonitor.js").to_string_lossy().to_string()).await.unwrap();
 			
 			pack_asar(path.join("unpacked").to_str().unwrap(), path.join("core.asar").to_str().unwrap()).await.unwrap();
 
@@ -84,16 +85,32 @@ fn search_file(start_dir: &PathBuf, file_name: &str) -> Option<PathBuf> {
     None
 }
 
-pub fn replace_power_monitor(file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    match fs::copy("powerMonitor.js", file_path) {
-        Ok(_) => {
-            println!("{}File copied successfully ✓{}", ANSI_GREEN, ANSI_RESET);
-            return Ok(());
+pub async fn download_js_files(file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+
+    fs::create_dir_all("./downloads")?;
+
+    let client = reqwest::Client::new();
+
+
+        let url = format!(
+            "https://raw.githubusercontent.com/Asm-Rosie/discord-idle-killer/main/powerMonitor.js",
+        );
+
+        let response = client
+            .get(&url)
+            .send()
+            .await?;
+
+        if response.status().is_success() {
+            let content = response.text().await?;
+            let mut file = fs::File::create(file_path)?;
+
+            file.write_all(content.as_bytes())?;
+            println!("{}Downloaded injection file successfully ✓{}", ANSI_GREEN, ANSI_RESET);
+        } else {
+            println!("{}", &format!("Failed to download file: {}\nStatus code: {}", file_path, response.status()));
         }
-        Err(ref e) if e.kind() == std::io::ErrorKind::NotFound => {
-            println!("{}Source file not found ✗.{}", ANSI_RED, ANSI_RESET);
-            return Ok(());
-        }
-        Err(e) => return Err(e.into()),
-    }  
+    
+
+    Ok(())
 }

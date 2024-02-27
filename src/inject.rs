@@ -3,6 +3,10 @@ use std::{fs, path::PathBuf};
 use crate::asar::extract::extract_asar;
 use crate::asar::pack::pack_asar;
 
+const ANSI_RED: &str = "\x1b[31m";
+const ANSI_GREEN: &str = "\x1b[32m";
+const ANSI_RESET: &str = "\x1b[0m";
+
 pub async fn inject(which_discord: &str) -> Result<bool, Box<dyn std::error::Error>> {
     let start_dir: PathBuf;
 
@@ -46,10 +50,12 @@ pub async fn inject(which_discord: &str) -> Result<bool, Box<dyn std::error::Err
 
 			fs::remove_dir_all(&path.join("unpacked")).unwrap();
 
+            println!("{}Injected successfully ✓{}\nfeel free to start your discord client now.", ANSI_GREEN, ANSI_RESET);
+
 			Ok(false)
         }
         None => {
-            println!("File not found");
+            println!("{}File not found ✗{}", ANSI_RED, ANSI_RESET);
 			Err("File not found".into())
         }
     }
@@ -81,11 +87,11 @@ fn search_file(start_dir: &PathBuf, file_name: &str) -> Option<PathBuf> {
 pub fn replace_power_monitor(file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     match fs::copy("powerMonitor.js", file_path) {
         Ok(_) => {
-            println!("File copied successfully.");
+            println!("{}File copied successfully ✓{}", ANSI_GREEN, ANSI_RESET);
             return Ok(());
         }
         Err(ref e) if e.kind() == std::io::ErrorKind::NotFound => {
-            println!("Source file not found.");
+            println!("{}Source file not found ✗.{}", ANSI_RED, ANSI_RESET);
             return Ok(());
         }
         Err(e) => return Err(e.into()),

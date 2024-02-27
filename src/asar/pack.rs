@@ -3,6 +3,9 @@ use asar::{AsarWriter, HashAlgorithm};
 use walkdir::WalkDir;
 use std::fs;
 
+const ANSI_GREEN: &str = "\x1b[32m";
+const ANSI_RESET: &str = "\x1b[0m";
+
 pub async fn pack_asar(path: &str, dest: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut writer = AsarWriter::new_with_algorithm(HashAlgorithm::Sha256);
 
@@ -20,7 +23,7 @@ pub async fn pack_asar(path: &str, dest: &str) -> Result<(), Box<dyn std::error:
     let mut output_file = File::create(dest)?;
     let bytes_written = writer.finalize(&mut output_file)?;
 
-    println!("wrote {} bytes to {}", bytes_written * 1000, dest);
+    println!("{}wrote {} bytes to {}{}", ANSI_GREEN, bytes_written * 1000, dest, ANSI_RESET);
 
     Ok(())
 }

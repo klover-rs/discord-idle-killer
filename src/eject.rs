@@ -1,6 +1,11 @@
 use std::fs;
 use std::path::PathBuf;
 
+
+const ANSI_RED: &str = "\x1b[31m";
+const ANSI_GREEN: &str = "\x1b[32m";
+const ANSI_RESET: &str = "\x1b[0m";
+
 pub fn eject(which_discord: &str) -> Result<(), Box<dyn std::error::Error>>{
     let start_dir: PathBuf;
     match std::env::consts::OS {
@@ -14,7 +19,7 @@ pub fn eject(which_discord: &str) -> Result<(), Box<dyn std::error::Error>>{
             start_dir = dirs::home_dir().unwrap().join(format!("Library/Application Support/{}", which_discord));
         }
         _ => {
-            panic!("OS not supported");
+            panic!("{}", format!("{}OS not supported{}", ANSI_RED, ANSI_RESET));
         }
     }
 
@@ -27,11 +32,12 @@ pub fn eject(which_discord: &str) -> Result<(), Box<dyn std::error::Error>>{
             println!("path: {:?}", path);
             fs::remove_file(path.join(path.join("core.asar"))).unwrap();
             fs::rename(path.join("core.asar.backup"), path.join("core.asar")).unwrap();
+            println!("{}ejected successfully ✓{}feel free to start your discord client now.", ANSI_GREEN, ANSI_RESET);
 
             Ok(())
         }
         None => {
-            println!("File not found");
+            println!("{}File not found{}", ANSI_RED, ANSI_RESET);
             Ok(())
         }
     }

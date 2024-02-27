@@ -2,6 +2,8 @@ use std::path::PathBuf;
 use asar::{AsarReader, Result as AsarResult};
 use std::fs;
 
+const ANSI_GREEN: &str = "\x1b[32m";
+const ANSI_RESET: &str = "\x1b[0m";
 
 pub async fn extract_asar(asar_file: &str, output: &str) -> AsarResult<String> {
     let asar_file = fs::read(asar_file)?;
@@ -23,7 +25,7 @@ pub async fn extract_asar(asar_file: &str, output: &str) -> AsarResult<String> {
 
         let progress_percentage = (counter as f64 / total_files) * 100.0;
 
-        println!("extracted: {} | {:.2}%", output_path.display(), progress_percentage);
+        println!("{}extracted: {} | {:.2}%{}",ANSI_GREEN, output_path.display(), progress_percentage, ANSI_RESET);
     }
 
     println!("total files: {}", total_files);

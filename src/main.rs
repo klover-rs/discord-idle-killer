@@ -4,6 +4,31 @@ mod inject;
 mod eject;
 
 use std::io;
+use std::process::Command;
+
+const ANSI_RED: &str = "\x1b[31m";
+const ANSI_RESET: &str = "\x1b[0m";
+
+fn kill_discord(which_discord: &str) {
+    let is_windows = cfg!(target_os = "windows");
+
+    if is_windows {
+        Command::new("powershell")
+            .arg("-Command")
+            .arg(&format!("Stop-Process -Name {}", which_discord))
+            .output()
+            .expect("Failed to kill the process");
+    } else {
+        Command::new("sh")
+            .arg("-c")
+            .arg(&format!("kill -9 $(ps aux | grep {} | awk '{{print $2}}')", which_discord))
+            .output()
+            .expect("Failed to kill the process");
+    }
+
+    println!("Process {} killed successfully", which_discord);
+}
+
 
 #[tokio::main]
 async fn main() {
@@ -28,7 +53,7 @@ async fn main() {
             .collect();
 
             if non_injected_clients.is_empty() {
-                println!("No non-injected clients found");
+                println!("{}No non-injected clients found{}", ANSI_RED, ANSI_RESET);
                 return;
             }
     
@@ -48,11 +73,12 @@ async fn main() {
 
             if choice > 0 && choice <= non_injected_clients.len() {
                 let selected_client = non_injected_clients[choice - 1];
-                println!("You chose: \n\n{}\n{}\n{}", selected_client.basename, selected_client.path, selected_client.injected);
+               
+                kill_discord(&selected_client.basename);
 
                 inject::inject(&selected_client.basename).await.unwrap();
             } else {
-                println!("Invalid choice");
+                println!("{}Invalid choice{}", ANSI_RED, ANSI_RESET);
             }
         }
         2 => {
@@ -61,7 +87,7 @@ async fn main() {
             .collect();
 
             if injected_clients.is_empty() {
-                println!("No injected clients found");
+                println!("{}No injected clients found{}", ANSI_RED, ANSI_RESET);
                 return;
             }
 
@@ -81,16 +107,15 @@ async fn main() {
 
             if choice > 0 && choice <= injected_clients.len() {
                 let selected_client = injected_clients[choice - 1];
-                println!("You chose: \n\n{}\n{}\n{}", selected_client.basename, selected_client.path, selected_client.injected);
-
+                kill_discord(&selected_client.basename);
                 eject::eject(&selected_client.basename).unwrap();
             } else {
-                println!("Invalid choice");
+                println!("{}Invalid choice{}", ANSI_RED, ANSI_RESET);
             }
 
         }
         _ => {
-            println!("Invalid choice");
+            println!("{}Invalid choice{}", ANSI_RED, ANSI_RESET);
         }
     }
 

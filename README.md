@@ -8,3 +8,6 @@ this project kills the discord idle timer, the discord idle timer is used to che
 
 1. clone this repo
 2. run `cargo run`
+
+## About anti-virus warnings
+these are false positive warnings, all of the prebuilt binaries are safe to use and directly built from source using the latest source code, but if you still do not trust the process of prebuilt binaries, please consider building it yourself. 
